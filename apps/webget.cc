@@ -10,18 +10,15 @@ using namespace std;
 void get_URL( const string& host, const string& path )
 {
   cerr << "Function called: get_URL(" << host << ", " << path << ")\n";
-  TCPSocket web{};
-  web.connect({host, "http"});
-  std::vector<std::string> request = {
-    "GET " + path + " HTTP/1.1\r\n",
-    "Host: " + host + "\r\n",
-    "Connection: close\r\n\r\n"
-  };
-  web.write(request);
+  TCPSocket web {};
+  web.connect( { host, "http" } );
+  std::vector<std::string> request
+    = { "GET " + path + " HTTP/1.1\r\n", "Host: " + host + "\r\n", "Connection: close\r\n\r\n" };
+  web.write( request );
 
   std::string buffer;
-  while (!web.eof()) {
-    web.read(buffer);
+  while ( !web.eof() ) {
+    web.read( buffer );
     cout << buffer;
   }
 }
