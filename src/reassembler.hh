@@ -1,6 +1,7 @@
 #pragma once
 
 #include "byte_stream.hh"
+#include <set>
 
 class Reassembler
 {
@@ -42,4 +43,17 @@ public:
 
 private:
   ByteStream output_; // the Reassembler writes to this ByteStream
+  bool is_exsited_last_byte_ = false;
+  struct range_string
+  {
+    uint64_t first_index_;
+    std::string data_;
+
+    friend bool operator<( const range_string& l, const range_string& r )
+    {
+      return l.first_index_ < r.first_index_;
+    }
+  };
+  std::set<range_string> gap_strings_ {};
+  uint64_t total_pending_bytes_{};
 };
