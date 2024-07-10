@@ -92,18 +92,16 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   if ( first_index == unassembled_index ) {
     auto it = gap_strings_.cbegin();
     while ( it != gap_strings_.cend() ) {
-      std::string to_push_bytes;
-      if ( it->first_index_ == first_index ) {
-        to_push_bytes = std::move( it->data_ );
+      auto&& [index, to_push_bytes] = *it;
+      if ( index == first_index ) {
+        total_pending_bytes_ -= to_push_bytes.size();
+        first_index += to_push_bytes.size();
+        output_.writer().push( std::move( to_push_bytes ) );
+        if ( is_exsited_last_byte_ && first_index == last_index_ ) {
+          output_.writer().close();
+        }
       } else {
         break;
-      }
-
-      total_pending_bytes_ -= to_push_bytes.size();
-      first_index += to_push_bytes.size();
-      output_.writer().push( std::move( to_push_bytes ) );
-      if ( is_exsited_last_byte_ && first_index == last_index_ ) {
-        output_.writer().close();
       }
 
       it = gap_strings_.erase( it );
