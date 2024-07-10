@@ -3,29 +3,31 @@
 
 using namespace std;
 
-auto Reassembler::split(uint64_t x) {
-  auto it = gap_strings_.lower_bound({x, ""});
-  if (it != gap_strings_.end() && it->first_index_ == x) {
+auto Reassembler::split( uint64_t x )
+{
+  auto it = gap_strings_.lower_bound( { x, "" } );
+  if ( it != gap_strings_.end() && it->first_index_ == x ) {
     return it;
   }
 
-  if (it == gap_strings_.begin()) {
+  if ( it == gap_strings_.begin() ) {
     return it;
   }
 
   --it;
-  if (x < it->end_index()) {
-    auto ret = gap_strings_.emplace_hint(it, x, it->data_.substr(x - it->first_index_));
-    it->data_.resize(x - it->first_index_);
+  if ( x < it->end_index() ) {
+    auto ret = gap_strings_.emplace_hint( it, x, it->data_.substr( x - it->first_index_ ) );
+    it->data_.resize( x - it->first_index_ );
     return ret;
   }
   ++it;
   return it;
 }
 
-void Reassembler::debug() {
+void Reassembler::debug()
+{
   std::cerr << "-----\n";
-  for (const auto& gap : gap_strings_) {
+  for ( const auto& gap : gap_strings_ ) {
     std::cerr << "[" << gap.first_index_ << " " << gap.end_index() << ")\n";
   }
   std::cerr << "-----\n";
@@ -72,23 +74,20 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     is_last_substring = false;
   }
 
-
-  if (is_last_substring && !is_exsited_last_byte_) {
+  if ( is_last_substring && !is_exsited_last_byte_ ) {
     is_exsited_last_byte_ = true;
     last_index_ = first_index + data.size();
   }
 
-  // debug();
-  auto end = split(first_index + data.size());
-  auto begin = split(first_index);
-  for (auto it = begin; it != end; ++it) {
+  auto end = split( first_index + data.size() );
+  auto begin = split( first_index );
+  for ( auto it = begin; it != end; ++it ) {
     total_pending_bytes_ -= it->data_.size();
   }
 
-  gap_strings_.erase(begin, end);
-  gap_strings_.emplace(first_index, data);
+  gap_strings_.erase( begin, end );
+  gap_strings_.emplace( first_index, data );
   total_pending_bytes_ += data.size();
-  // debug();
 
   if ( first_index == unassembled_index ) {
     auto it = gap_strings_.cbegin();
@@ -103,7 +102,7 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
       total_pending_bytes_ -= to_push_bytes.size();
       first_index += to_push_bytes.size();
       output_.writer().push( std::move( to_push_bytes ) );
-      if (is_exsited_last_byte_ && first_index == last_index_) {
+      if ( is_exsited_last_byte_ && first_index == last_index_ ) {
         output_.writer().close();
       }
 

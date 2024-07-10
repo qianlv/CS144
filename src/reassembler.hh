@@ -42,7 +42,7 @@ public:
   const Writer& writer() const { return output_.writer(); }
 
 private:
-  auto split(uint64_t x);
+  auto split( uint64_t x );
   void debug();
 
 private:
@@ -60,11 +60,8 @@ private:
       return l.first_index_ < r.first_index_;
     }
 
-    uint64_t end_index() const {
-      return first_index_ + data_.size();
-    }
+    uint64_t end_index() const { return first_index_ + data_.size(); }
   };
   std::set<range_string> gap_strings_ {};
-  uint64_t total_pending_bytes_{};
-
+  uint64_t total_pending_bytes_ {};
 };
