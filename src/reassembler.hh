@@ -42,18 +42,29 @@ public:
   const Writer& writer() const { return output_.writer(); }
 
 private:
+  auto split(uint64_t x);
+  void debug();
+
+private:
   ByteStream output_; // the Reassembler writes to this ByteStream
   bool is_exsited_last_byte_ = false;
+  uint64_t last_index_ = 0;
+
   struct range_string
   {
     uint64_t first_index_;
-    std::string data_;
+    mutable std::string data_;
 
     friend bool operator<( const range_string& l, const range_string& r )
     {
       return l.first_index_ < r.first_index_;
     }
+
+    uint64_t end_index() const {
+      return first_index_ + data_.size();
+    }
   };
   std::set<range_string> gap_strings_ {};
   uint64_t total_pending_bytes_{};
+
 };
