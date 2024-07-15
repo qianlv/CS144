@@ -21,29 +21,30 @@ void TCPSender::push( const TransmitFunction& transmit )
 
   uint64_t wsize = ( window_size_ == 0 ) ? 1 : window_size_;
   while ( wsize > sequence_numbers_in_flight() ) {
+    if ( nextsequnum_ > writer().bytes_pushed() + 1 ) { // this case, with fin msg has sent, so return
+      return;
+    }
+
     TCPSenderMessage msg = make_empty_message();
+
     if ( nextsequnum_ == 0 ) {
       msg.SYN = true;
     }
 
-    if ( nextsequnum_ > writer().bytes_pushed() + 1 ) {
-      return;
-    }
-
-    uint64_t len = writer().bytes_pushed() + 1 - nextsequnum_;
-    if ( nextsequnum_ == 0 ) { // skip the SYN seqno
+    uint64_t len = writer().bytes_pushed() + 1 - nextsequnum_; // payload length
+    if ( msg.SYN ) {                                           // make syn occupy one window space
       len -= 1;
     }
 
-    len = std::min( std::min( wsize - sequence_numbers_in_flight(), TCPConfig::MAX_PAYLOAD_SIZE ), len );
+    len = std::min( std::min( wsize - sequence_numbers_in_flight(), TCPConfig::MAX_PAYLOAD_SIZE ),
+                    len ); // min(really window size, MAX_PAYLOAD_SIZE, payload len)
     read( input_.reader(), len, msg.payload );
 
-    if ( len < wsize && reader().is_finished() ) {
+    if ( len < (wsize - sequence_numbers_in_flight()) && reader().is_finished() ) { // make fin occupy one window space
       msg.FIN = true;
     }
 
     nextsequnum_ += msg.sequence_length();
-    // std::cerr << "push sequence_length() = " << msg.sequence_length() << std::endl;
     if ( msg.sequence_length() == 0 ) {
       return;
     }
