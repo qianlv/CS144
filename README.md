@@ -40,3 +40,15 @@ reference: using `std::queue<std::string>` to implement，[Checkpoint0](https://
    [1, 2], [3, 4], [6, 6], [7, 8], [10, 20], then erase [3, 4], [6, 6] from `gap_string_` then insert [3, 6]
 
 reference: [odt tree](https://oi-wiki.org/misc/odt/)
+
+## Checkpoint 2
+
+1. Convert absolute seqno to relative seqno, just (zero point + absolute seqno) % 2^32
+2. Convert seqno to absolute seqno.
+   2.1 Get the distance between seqno and zero point as offset
+   2.2 use checkpoint to the multile of 2^32 as nwrap, now offset = (offset + nwrap * 2^32),
+       then if offset < checkpoint, choose from (offset, offset + 2^32) that min distance to checkpoint
+       else choose from (offset - 2^32, offset) that min distance to checkpoint
+
+3. `TCPReceiver::receive`, attention to first_index is absolute seqno - 1
+   `TCPReceiver::send`, ackno is attention to closed status for stream
