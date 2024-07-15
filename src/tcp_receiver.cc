@@ -21,7 +21,7 @@ void TCPReceiver::receive( TCPSenderMessage message )
     return;
   }
 
-  auto first_index = seqno.unwrap( *zero_point, writer().bytes_pushed() ) - 1;
+  auto first_index = seqno.unwrap( *zero_point, writer().bytes_pushed() + 1 ) - 1;
   reassembler_.insert( first_index, message.payload, message.FIN );
 }
 
