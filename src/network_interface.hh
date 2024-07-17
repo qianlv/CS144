@@ -1,6 +1,7 @@
 #pragma once
 
 #include <queue>
+#include <unordered_map>
 
 #include "address.hh"
 #include "ethernet_frame.hh"
@@ -81,4 +82,22 @@ private:
 
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
+
+  using AddressNumber = uint32_t;
+  using Timer = uint64_t;
+
+  struct EthernetAddressCacheEntry
+  {
+    EthernetAddress eth;
+    Timer timer;
+  };
+
+  static const uint64_t EXPIRE_TIME = 30000;            // Ip to Ethernet address expire time
+  static const uint64_t ARP_REQUEST_EXPIRE_TIME = 5000; // The arp request expire time
+
+  std::unordered_map<AddressNumber, EthernetAddressCacheEntry> ip2eth_ {}; // Mapping from IP to Ethernet addresses
+  std::unordered_map<AddressNumber, std::queue<InternetDatagram>>
+    waiting_queue_ {}; // Waiting the Ethernet addresses datagram
+  std::unordered_map<AddressNumber, Timer>
+    arp_request_cache_ {}; // the arp request cache timer, don't send arp request at 5 seconds
 };
