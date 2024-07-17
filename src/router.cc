@@ -57,7 +57,6 @@ const Router::RouterEntry* Router::match( uint32_t ip ) const
     uint32_t i = loop_index - 1;
     auto it = routers_[i].find( Router::mask_ip( ip, i ) );
     if ( it != routers_[i].end() ) {
-      std::cerr << "found\n";
       return &it->second;
     }
   }
