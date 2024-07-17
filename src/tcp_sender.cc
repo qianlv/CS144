@@ -40,7 +40,8 @@ void TCPSender::push( const TransmitFunction& transmit )
                     len ); // min(really window size, MAX_PAYLOAD_SIZE, payload len)
     read( input_.reader(), len, msg.payload );
 
-    if ( len < (wsize - sequence_numbers_in_flight()) && reader().is_finished() ) { // make fin occupy one window space
+    if ( len < ( wsize - sequence_numbers_in_flight() )
+         && reader().is_finished() ) { // make fin occupy one window space
       msg.FIN = true;
     }
 
