@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <optional>
+#include <unordered_set>
 
 #include "exception.hh"
 #include "network_interface.hh"
@@ -35,4 +36,22 @@ public:
 private:
   // The router's collection of network interfaces
   std::vector<std::shared_ptr<NetworkInterface>> _interfaces {};
+
+  static constexpr size_t NUM_PREFFIX = 32;
+  struct RouterEntry
+  {
+    std::optional<Address> next_hop {};
+    size_t interface_num {};
+  };
+
+  // The router's collection of forwarding rule,
+  // prefix_length -> {route_prefix -> (next_hop, interface_num)}
+  std::array<std::unordered_map<uint32_t, RouterEntry>, NUM_PREFFIX + 1> routers_ {};
+
+  // Find the longest-prefix-match route
+  const RouterEntry* match(uint32_t ip) const;
+
+  // Get prefix ip addres that mask ip with specificd prefix length
+  // 192.168.1.1/16 -> 192.168.0.0 only keep the 16 bit prefix ip.
+  static uint32_t mask_ip(uint32_t ip, uint32_t prefix_length);
 };
